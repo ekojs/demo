@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: write
-  # deployments: write
 
 jobs:
   build:
@@ -51,10 +50,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: ${{ github.ref }}
         body: |
-          Changes in this Release
-          - First Change
-          - Second Change
+          ## [1.0.2] - 2022-05-01
+
+          ### Fixed
+          - Fixing Github Workflow
         draft: false
         prerelease: false
