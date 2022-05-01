@@ -1,4 +1,4 @@
-Helper Collections
+Helper Collections Demo
 =============
 
 Helper Collections. Compatible with PHP >= 7.3.

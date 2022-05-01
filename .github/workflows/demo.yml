@@ -9,7 +9,7 @@ on:
 
 permissions:
   contents: write
-  deployments: write
+  # deployments: write
 
 jobs:
   build:
