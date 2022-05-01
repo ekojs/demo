@@ -42,11 +42,6 @@ jobs:
 
     - name: Run test suite
       run: composer run test
-
-    - name: Setup PCOV
-      run: |
-        composer require pcov/clobber
-        vendor/bin/pcov clobber
       
     - name: Create Release
       id: create-new-release
