@@ -1,19 +1,24 @@
 name: Release Deployment
 
 on:
+  pull_request:
   push:
+    branches:
+      - "master"
     tags:
       - v**
-  # pull_request:
-  #   branches: [ master ]
-
+   
 permissions:
   contents: write
 
 jobs:
   build:
-
+    name: PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['7.3', '8.0', '8.1']
 
     steps:
     - uses: actions/checkout@v3
@@ -21,8 +26,8 @@ jobs:
     - name: Setup PHP with PCOV
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'
-        ini-values: pcov.directory=src
+        php-version: "${{ matrix.php-versions }}"
+        extensions: intl
         coverage: pcov
 
     - name: Validate composer.json and composer.lock
@@ -58,3 +63,10 @@ jobs:
           - Fixing Github Workflow
         draft: false
         prerelease: false
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4.3.3
+      with:
+          branch: gh-pages
+          folder: build/logs/html
+
