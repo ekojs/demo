@@ -23,6 +23,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Setup PHP with PCOV
+      id: setup-php
       uses: shivammathur/setup-php@v2
       with:
         php-version: "${{ matrix.php-versions }}"
@@ -37,9 +38,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        key: ${{ runner.os }}-php-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
-          ${{ runner.os }}-php-
+          ${{ runner.os }}-php-${{ steps.setup-php.outputs.php-version }}-
 
     - name: Install dependencies
       run: composer install
@@ -49,7 +50,12 @@ jobs:
 
     - shell: bash
       run: |
-          which tar && tar -czvf coverage.tar.gz build/logs/html
+          cd build/logs/html
+          mv _js js && mv _css css && mv _icons icons
+          for x in $(grep . -irle '_js');do sed -i'' 's/_js/js/g' $x;done
+          for x in $(grep . -irle '_css');do sed -i'' 's/_css/css/g' $x;done
+          for x in $(grep . -irle '_icons');do sed -i'' 's/_icons/icons/g' $x;done
+          which tar && tar -czvf coverage.tar.gz .
     - name: Upload coverage as artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -57,37 +63,21 @@ jobs:
         path: coverage.tar.gz
 
   deploy:
-    name: Deployment
+    name: Deployment ${{ matrix.operating-system }} - PHP ${{ matrix.php-versions }}
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest, macos-latest]
+        php-versions: ['7.3', '8.0', '8.1']
 
     steps:
-    - uses: actions/checkout@v3
-      
-    - name: Setup PHP with PCOV
-      uses: shivammathur/setup-php@v2
+    - name: Download coverage
+      uses: actions/download-artifact@v3
       with:
-        php-version: '7.3'
-        extensions: intl
-        coverage: pcov
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
-
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
-
-    - name: Install dependencies
-      run: composer install
-
-    - name: Run test suite
-      run: composer run test
+        name: mycoverage_${{ runner.os }}_${{ matrix.php-versions }}
+        path: coverage.tar.gz
 
     - name: Create Release
       id: create-new-release
