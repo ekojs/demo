@@ -87,6 +87,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v3
+    
     - name: Download coverage
       uses: actions/download-artifact@v3
       with:
@@ -95,6 +97,10 @@ jobs:
     - shell: bash
       run: |
           which tar && tar -xzvf coverage.tar.gz && cd build/logs/html && mv _js js && mv _css css && mv _icons icons && for x in $(grep . -irle '_js');do sed -i'' 's/_js/js/g' $x;done && for x in $(grep . -irle '_css');do sed -i'' 's/_css/css/g' $x;done && for x in $(grep . -irle '_icons');do sed -i'' 's/_icons/icons/g' $x;done
+
+    - name: List files in the repository
+      run: |
+        ls ${{ github.workspace }}/build/logs/html
 
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4.3.3
