@@ -7,7 +7,7 @@ on:
       - "master"
     tags:
       - v**
-   
+
 permissions:
   contents: write
 
@@ -47,7 +47,14 @@ jobs:
 
     - name: Run test suite
       run: composer run test
-      
+
+  deploy:
+    name: Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
     - name: Create Release
       id: create-new-release
       uses: actions/create-release@v1
@@ -69,4 +76,3 @@ jobs:
       with:
           branch: gh-pages
           folder: build/logs/html
-
