@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: PHP ${{ matrix.php-versions }}
+    name: PHP ${{ matrix.php-versions }} - ${{ matrix.operating-system }}
     runs-on: ${{ matrix.operating-system }}
     strategy:
       fail-fast: false
@@ -47,8 +47,18 @@ jobs:
     - name: Run test suite
       run: composer run test
 
+    - shell: bash
+        run: |
+          which tar && tar -czvf coverage.tar.gz build/logs/html
+    - name: Upload coverage as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: mycoverage_${{ runner.os }}_${{ matrix.php-versions }}
+        path: coverage.tar.gz
+
   deploy:
     name: Deployment
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
