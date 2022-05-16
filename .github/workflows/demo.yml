@@ -48,7 +48,7 @@ jobs:
       run: composer run test
 
     - shell: bash
-        run: |
+      run: |
           which tar && tar -czvf coverage.tar.gz build/logs/html
     - name: Upload coverage as artifacts
       uses: actions/upload-artifact@v3
